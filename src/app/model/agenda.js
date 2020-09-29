@@ -1,5 +1,6 @@
-
+const bindToDate = require('./bindToDate')
 const fs = require('fs')
+const { json } = require('express')
 const path = './src/app/database/agenda.json'
 
 
@@ -12,6 +13,7 @@ function write(content){
     const updateFile = JSON.stringify(content)
     fs.writeFileSync(path, updateFile, 'utf-8')
 }
+
 
 
 class Agenda {
@@ -31,15 +33,32 @@ class Agenda {
         
     }
 
-    listarHorarios(req, res){
+    
 
+    listarHorarios(req, res){
+        
+        const periodo = []
         const agenda = read()
-        const horarioslivres = [] 
-        agenda.filter(agenda => { 
-            if (agenda.inicio >= req.params.horaInicio && agenda.fim <= req.params.horaFim) {
-                horarioslivres.push(agenda.inicio)
-                horarioslivres.push(agenda.fim)
-            }})
+        const data1 = bindToDate(req.params.data1);
+        const data2 = bindToDate(req.params.data2);
+        
+       
+        let aux
+        if(data1 > data2){
+            aux = data1;
+            data1 = data2;
+            data2 = aux;
+        }
+
+        agenda.filter((obj) => {
+            const agenda = bindToDate(obj.data);
+            if (agenda >= data1 && agenda <= data2) {
+                periodo.push(obj)
+                }
+        })
+
+    
+        return res.send(periodo)
         
     }
 
